@@ -12,7 +12,7 @@ const Login = () => {
   };
 
   return (
-    <div className="h-auto min-h-screen flex flex-col md:flex-row">
+    <div className="h-auto min-h-screen flex flex-col-reverse md:flex-row">
       {/* Left Side */}
       <div className="flex-1 bg-white flex flex-col justify-center items-center px-4 py-8 md:px-8">
         <div className="max-w-sm w-full">

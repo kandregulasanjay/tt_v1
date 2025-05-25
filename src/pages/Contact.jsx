@@ -38,7 +38,7 @@ const Contact = () => {
         <p className="text-center text-2xl text-gray-700 mb-10">
           Have questions, need support, or want to explore partnership opportunities? <br /> We’d love to hear from you.
         </p>
-        <div className="flex flex-col md:flex-row gap-8">
+        <div className="flex flex-col-reverse md:flex-row gap-8">
           {/* Left: Contact Form */}
           <form
             onSubmit={handleSubmit}

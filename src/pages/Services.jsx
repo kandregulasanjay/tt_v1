@@ -25,39 +25,39 @@ const Services = () => {
       </div>
 
       {/* Service 1: Image Left, Text Right */}
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center px-4">
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center px-4 mb-8 md:mb-0">
         <div className="md:w-1/2 flex justify-center">
           <img src={roboPerson} alt="Agentic Chatbots" className="w-full shadow" />
         </div>
-        <div className="md:w-1/2 flex flex-col items-start">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 ml-4">Agentic Chatbots</h2>
-          <p className="text-gray-700 text-lg  ml-4">
+        <div className="md:w-1/2 flex flex-col items-start mt-6 md:mt-0">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 ml-4 md:ml-4">Agentic Chatbots</h2>
+          <p className="text-gray-700 text-lg ml-4 md:ml-4">
             Provide 24/7 intelligent support with human-like conversation flows.
           </p>
         </div>
       </div>
 
       {/* Service 2: Text Left, Image Right */}
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row-reverse items-center px-4">
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row-reverse items-center px-4 mb-8 md:mb-0">
         <div className="md:w-1/2 flex justify-center">
           <img src={predictiveAnalytics} alt="Predictive Analytics" className="w-full shadow" />
         </div>
-        <div className="md:w-1/2 flex flex-col items-start">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">Predictive Analytics</h2>
-          <p className="text-gray-700 text-lg">
+        <div className="md:w-1/2 flex flex-col items-start mt-6 md:mt-0">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 ml-4 md:ml-0">Predictive Analytics</h2>
+          <p className="text-gray-700 text-lg ml-4 md:ml-0">
             Turn data into actionable insights to make informed business decisions.
           </p>
         </div>
       </div>
 
       {/* Service 3: Image Left, Text Right */}
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center px-4">
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center px-4 mb-8 md:mb-0">
         <div className="md:w-1/2 flex justify-center">
           <img src={bpa} alt="Business Process Automation" className="w-full shadow" />
         </div>
-        <div className="md:w-1/2 flex flex-col items-start">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4  ml-4">Business Process Automation</h2>
-          <p className="text-gray-700 text-lg ml-4">
+        <div className="md:w-1/2 flex flex-col items-start mt-6 md:mt-0">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 ml-4 md:ml-4">Business Process Automation</h2>
+          <p className="text-gray-700 text-lg ml-4 md:ml-4">
             Optimize operations and reduce manual overhead with intelligent automation.
           </p>
         </div>
