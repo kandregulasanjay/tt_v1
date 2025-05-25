@@ -65,7 +65,7 @@ const Blog = () => {
 
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 pb-16">
-                <p className="text-center text-xl md:text-2xl text-gray-700 mb-12 mt-16">
+                <p className="text-center text-lg md:text-lg text-gray-700 mb-12 mt-16">
                     Stay ahead with curated content from our team of technology experts. From AI developments to SaaS best practices, our blog delivers valuable knowledge to support your transformation journey.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

@@ -62,7 +62,7 @@ const Product = () => {
             <span className="text-white text-lg font-semibold">Real-time Insights & Reporting</span>
           </div>
         </div>
-        <p className="text-center text-lg text-gray-700 font-semibold mb-12">
+        <p className="text-center text-lg text-gray-700 mb-12">
           Discover how our chatbot is redefining customer interaction.
         </p>
       </div>

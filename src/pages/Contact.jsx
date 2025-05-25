@@ -36,7 +36,7 @@ const Contact = () => {
         <h2 className="text-3xl md:text-5xl font-bold text-center text-gray-800 mb-4 mt-12">
           Let's Connect
         </h2>
-        <p className="text-center text-xl text-gray-700 mb-10">
+        <p className="text-center text-lg text-gray-700 mb-10">
           Have questions, need support, or want to explore partnership opportunities? <br /> We’d love to hear from you.
         </p>
         <div className="flex flex-col-reverse md:flex-row gap-8">
