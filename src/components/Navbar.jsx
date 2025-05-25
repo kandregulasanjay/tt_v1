@@ -11,7 +11,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
-            <Link to="/">
+            <Link to="/home">
               <img
                 className="h-10 w-auto"
                 src={logo}
@@ -21,7 +21,7 @@ const Navbar = () => {
           </div>
           {/* Center Nav Links */}
           <div className="hidden md:flex space-x-8">
-            <Link to="/" className="text-gray-700 hover:text-[#3DC1B1] font-medium">Home</Link>
+            <Link to="/home" className="text-gray-700 hover:text-[#3DC1B1] font-medium">Home</Link>
             <Link to="/about" className="text-gray-700 hover:text-[#3DC1B1] font-medium">About Us</Link>
             <Link to="/services" className="text-gray-700 hover:text-[#3DC1B1] font-medium">Services</Link>
             <Link to="/products" className="text-gray-700 hover:text-[#3DC1B1] font-medium">Products</Link>
@@ -63,7 +63,7 @@ const Navbar = () => {
       {menuOpen && (
         <div className="md:hidden bg-white shadow px-4 py-4">
           <div className="flex flex-col space-y-4">
-            <Link to="/" className="text-gray-700 hover:text-[#3DC1B1] font-medium" onClick={() => setMenuOpen(false)}>Home</Link>
+            <Link to="/home" className="text-gray-700 hover:text-[#3DC1B1] font-medium" onClick={() => setMenuOpen(false)}>Home</Link>
             <Link to="/about" className="text-gray-700 hover:text-[#3DC1B1] font-medium" onClick={() => setMenuOpen(false)}>About Us</Link>
             <Link to="/services" className="text-gray-700 hover:text-[#3DC1B1] font-medium" onClick={() => setMenuOpen(false)}>Services</Link>
             <Link to="/products" className="text-gray-700 hover:text-[#3DC1B1] font-medium" onClick={() => setMenuOpen(false)}>Products</Link>
