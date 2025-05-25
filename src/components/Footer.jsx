@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom"; // <-- Add this import
 import logo from "../assets/webp/footer-logo.webp";
 import facebook from "../assets/webp/facebook.webp";
 import twitter from "../assets/webp/twitter.webp";
@@ -28,13 +29,13 @@ const Footer = () => {
         <div className="flex flex-col items-center flex-1">
           <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
           <ul className="space-y-2">
-            <li><a href="/home" className="hover:text-[#3dc1b1] transition font-light">Home</a></li>
-            <li><a href="/about" className="hover:text-[#3dc1b1] transition font-light">About Us</a></li>
-            <li><a href="/services" className="hover:text-[#3dc1b1] transition font-light">Services</a></li>
-            <li><a href="/products" className="hover:text-[#3dc1b1] transition font-light">Products</a></li>
-            <li><a href="/blogs" className="hover:text-[#3dc1b1] transition font-light">Blog News</a></li>
-            <li><a href="/contact" className="hover:text-[#3dc1b1] transition font-light">Contact Us</a></li>
-            <li><a href="/support-center" className="hover:text-[#3dc1b1] transition font-light">Support/FAQ</a></li>
+            <li><Link to="/home" className="hover:text-[#3dc1b1] transition font-light">Home</Link></li>
+            <li><Link to="/about" className="hover:text-[#3dc1b1] transition font-light">About Us</Link></li>
+            <li><Link to="/services" className="hover:text-[#3dc1b1] transition font-light">Services</Link></li>
+            <li><Link to="/products" className="hover:text-[#3dc1b1] transition font-light">Products</Link></li>
+            <li><Link to="/blogs" className="hover:text-[#3dc1b1] transition font-light">Blog News</Link></li>
+            <li><Link to="/contact" className="hover:text-[#3dc1b1] transition font-light">Contact Us</Link></li>
+            <li><Link to="/support-center" className="hover:text-[#3dc1b1] transition font-light">Support/FAQ</Link></li>
           </ul>
         </div>
         {/* Right: Contact Info */}
