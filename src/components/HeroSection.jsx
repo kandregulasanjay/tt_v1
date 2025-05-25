@@ -16,7 +16,7 @@ const HeroSection = () => {
         <h1 className="text-white text-4xl md:text-6xl font-bold mb-6">
           Empowering the Future of Business with AI
         </h1>
-        <p className="text-white text-lg md:text-2xl mb-8 max-w-2xl">
+        <p className="text-white text-lg md:text-xl mb-8 max-w-2xl">
           Discover scalable, intelligent solutions tailored to your industry needs
         </p>
         <button className="rounded-full bg-[#3DC1B1] text-white px-8 py-3 text-lg font-semibold shadow hover:bg-[#34a99b] transition">

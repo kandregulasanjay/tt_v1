@@ -13,7 +13,7 @@ const Services = () => {
         style={{ backgroundImage: `url(${servicesBg})` }}
       >
         <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-        <h1 className="relative z-10 text-white text-4xl md:text-5xl font-bold text-center tracking-wider">
+        <h1 className="relative z-10 text-white text-4xl md:text-5xl font-bold text-center ">
           Our Services
         </h1>
       </div>
@@ -65,7 +65,7 @@ const Services = () => {
 
       {/* Final Centered Paragraph */}
       <div className="max-w-3xl mx-auto px-4 py-12">
-        <p className="text-center text-lg text-gray-700 font-semibold">
+        <p className="text-center text-lg text-gray-700">
           Let us help you integrate future-ready technologies that enhance performance and accelerate growth.
         </p>
       </div>

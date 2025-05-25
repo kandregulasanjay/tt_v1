@@ -10,7 +10,7 @@ const Product = () => {
         style={{ backgroundImage: `url(${products})` }}
       >
         <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-        <h1 className="relative z-10 text-white text-5xl md:text-6xl font-bold text-center tracking-wider">
+        <h1 className="relative z-10 text-white text-5xl md:text-6xl font-bold text-center">
           Products
         </h1>
       </div>

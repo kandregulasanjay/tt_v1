@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import contact from "../assets/webp/contact-bg.webp";
+import email from "../assets/webp/email.webp";
 
 const Contact = () => {
   const [form, setForm] = useState({
@@ -25,17 +26,17 @@ const Contact = () => {
         style={{ backgroundImage: `url(${contact})` }}
       >
         <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-        <h1 className="relative z-10 text-white text-5xl md:text-6xl font-bold text-center tracking-wider">
+        <h1 className="relative z-10 text-white text-5xl md:text-6xl font-bold text-center">
           Contact Us
         </h1>
       </div>
 
       {/* Main Content */}
       <div className="max-w-5xl mx-auto px-4 relative z-20">
-        <h2 className="text-3xl md:text-6xl font-bold text-center text-gray-800 mb-4 mt-12">
+        <h2 className="text-3xl md:text-5xl font-bold text-center text-gray-800 mb-4 mt-12">
           Let's Connect
         </h2>
-        <p className="text-center text-2xl text-gray-700 mb-10">
+        <p className="text-center text-xl text-gray-700 mb-10">
           Have questions, need support, or want to explore partnership opportunities? <br /> We’d love to hear from you.
         </p>
         <div className="flex flex-col-reverse md:flex-row gap-8">
@@ -93,7 +94,7 @@ const Contact = () => {
             <div className="flex items-center mb-6 w-full">
               <div className="flex-shrink-0 w-10 h-10 rounded-full border-2 border-white flex items-center justify-center bg-transparent mr-4">
                 <img
-                  src="src/assets/email.png"
+                  src={email}
                   alt="Email"
                   className="w-4 h-4"
                 />
