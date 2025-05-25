@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, HashRouter as Router } from "react-router-dom";
+import { Link } from "react-router-dom";
 import logo from "../assets/webp/footer-logo.webp";
 import facebook from "../assets/webp/facebook.webp";
 import twitter from "../assets/webp/twitter.webp";
