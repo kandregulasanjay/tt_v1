@@ -26,7 +26,7 @@ const Navbar = () => {
             <Link to="/services" className="text-gray-700 hover:text-[#3DC1B1] font-medium">Services</Link>
             <Link to="/products" className="text-gray-700 hover:text-[#3DC1B1] font-medium">Products</Link>
             <Link to="/blogs" className="text-gray-700 hover:text-[#3DC1B1] font-medium">Blogs/News</Link>
-            <Link to="/contact" className="text-gray-700 hover:text-[#3DC1B1] font-medium">Contact Us</Link>
+            {/* <Link to="/contact" className="text-gray-700 hover:text-[#3DC1B1] font-medium">Contact Us</Link> */}
             <Link to="/support-center" className="text-gray-700 hover:text-[#3DC1B1] font-medium">Support/FAQ</Link>
           </div>
           {/* Hamburger for Mobile */}
@@ -51,9 +51,9 @@ const Navbar = () => {
           </div>
           {/* Login Button */}
           <div className="hidden md:flex items-center">
-            <Link to="/login">
+            <Link to="/contact">
               <button className="rounded-full bg-[#3DC1B1] text-white px-6 py-2 font-semibold shadow hover:bg-[#34a99b] transition">
-                Login
+                Contact Us
               </button>
             </Link>
           </div>
@@ -68,11 +68,11 @@ const Navbar = () => {
             <Link to="/services" className="text-gray-700 hover:text-[#3DC1B1] font-medium" onClick={() => setMenuOpen(false)}>Services</Link>
             <Link to="/products" className="text-gray-700 hover:text-[#3DC1B1] font-medium" onClick={() => setMenuOpen(false)}>Products</Link>
             <Link to="/blogs" className="text-gray-700 hover:text-[#3DC1B1] font-medium" onClick={() => setMenuOpen(false)}>Blogs/News</Link>
-            <Link to="/contact" className="text-gray-700 hover:text-[#3DC1B1] font-medium" onClick={() => setMenuOpen(false)}>Contact Us</Link>
+            {/* <Link to="/contact" className="text-gray-700 hover:text-[#3DC1B1] font-medium" onClick={() => setMenuOpen(false)}>Contact Us</Link> */}
             <Link to="/support-center" className="text-gray-700 hover:text-[#3DC1B1] font-medium" onClick={() => setMenuOpen(false)}>Support/FAQ</Link>
-            <Link to="/login">
+            <Link to="/contact">
               <button className="rounded-full bg-[#3DC1B1] text-white px-6 py-2 font-semibold shadow hover:bg-[#34a99b] transition w-full mt-2">
-                Login
+                Contact Us
               </button>
             </Link>
           </div>
