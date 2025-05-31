@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import emailjs from "emailjs-com";
 import contact from "../assets/webp/contact-bg.webp";
 import email from "../assets/webp/email.webp";
 
@@ -16,6 +17,28 @@ const Contact = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    emailjs
+      .send(
+        "service_p9vmsev",
+        "template_4d9dmsa",
+        {
+          from_name: form.name,
+          from_email: form.email,
+          phone: form.phone,
+          message: form.message,
+        },
+        "KG7Kt8pWmq3rHmzUw"
+      )
+      .then(
+        () => {
+          alert("Message sent successfully!");
+          setForm({ name: "", email: "", phone: "", message: "" });
+        },
+        () => {
+          alert("Failed to send message. Please try again.");
+        }
+      );
   };
 
   return (
