@@ -1,4 +1,6 @@
 import React from "react";
+// eslint-disable-next-line no-unused-vars
+import { motion } from "framer-motion";
 import blog from "../assets/webp/blog-bg.webp"; 
 import roboHand from '../assets/webp/robo_hand.webp';
 import roboPerson from '../assets/webp/robo_person.webp';
@@ -49,6 +51,18 @@ const articles = [
     },
 ];
 
+const cardVariants = {
+    hidden: { opacity: 0, y: 40 },
+    visible: (i = 1) => ({
+        opacity: 1,
+        y: 0,
+        transition: {
+            delay: i * 0.15,
+            duration: 0.7
+        }
+    })
+};
+
 const Blog = () => {
     return (
         <div className="min-h-screen bg-white">
@@ -70,7 +84,15 @@ const Blog = () => {
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {articles.map((article, idx) => (
-                        <div key={idx} className="p-3 flex flex-col items-start bg-transparent">
+                        <motion.div
+                            key={idx}
+                            className="p-3 flex flex-col items-start bg-transparent"
+                            custom={idx}
+                            variants={cardVariants}
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true, amount: 0.3 }}
+                        >
                             <img
                                 src={article.img}
                                 alt={article.title}
@@ -80,7 +102,7 @@ const Blog = () => {
                             <button className="mt-4 text-[#3dc1b1] font-semibold underline underline-offset-4 decoration-4 decoration-[#3dc1b1] hover:text-[#35b0a1] transition text-left">
                                 Read More
                             </button>
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
             </div>

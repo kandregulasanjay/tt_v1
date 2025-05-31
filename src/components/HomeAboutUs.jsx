@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+// eslint-disable-next-line no-unused-vars
+import { motion } from 'framer-motion';
 import VisionMissionSection from './VisionMissionSection';
 import roboHand from '../assets/webp/robo_hand.webp';
 import roboPerson from '../assets/webp/robo_person.webp';
@@ -13,11 +15,34 @@ import explore1 from '../assets/webp/explore1.webp';
 import explore2 from '../assets/webp/explore2.webp';
 import explore3 from '../assets/webp/explore3.webp';
 
+const fadeInUp = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7 } }
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: (i = 1) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.2,
+      duration: 0.7
+    }
+  })
+};
+
 const HomeAboutUs = () => {
   return (
     <>
       {/* About Us Section */}
-      <section className="flex flex-col md:flex-row items-center justify-between bg-white p-6 md:p-12 px-4 sm:px-6 lg:px-36">
+      <motion.section
+        className="flex flex-col md:flex-row items-center justify-between bg-white p-6 md:p-12 px-4 sm:px-6 lg:px-36"
+        variants={fadeInUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+      >
         {/* Left Side - Image */}
         <div className="w-full md:w-1/2 mb-6 md:mb-0">
           <img
@@ -46,13 +71,26 @@ const HomeAboutUs = () => {
             </button>
           </Link>
         </div>
-      </section>
+      </motion.section>
 
       {/* Vision & Mission Section */}
-      <VisionMissionSection />
+      <motion.div
+        variants={fadeInUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+      >
+        <VisionMissionSection />
+      </motion.div>
 
       {/* Our Services Section */}
-      <section className="py-16 px-4 sm:px-6">
+      <motion.section
+        className="py-16 px-4 sm:px-6"
+        variants={fadeInUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+      >
         <div className="text-center mb-12 max-w-2xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Our Services</h2>
           <p className="text-gray-600 text-lg">
@@ -61,7 +99,14 @@ const HomeAboutUs = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {/* Card 1 */}
-          <div className="bg-white shadow-lg flex flex-col items-center p-0 relative overflow-visible">
+          <motion.div
+            className="bg-white shadow-lg flex flex-col items-center p-0 relative overflow-visible"
+            custom={0}
+            variants={cardVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+          >
             {/* Main image */}
             <div className="w-full relative">
               <img src={roboPerson} alt="Agentic Chatbot" className="w-full h-60 object-cover" />
@@ -85,9 +130,16 @@ const HomeAboutUs = () => {
                 </button>
               </Link>
             </div>
-          </div>
+          </motion.div>
           {/* Card 2 */}
-          <div className="bg-white shadow-lg flex flex-col items-center p-0 relative overflow-visible">
+          <motion.div
+            className="bg-white shadow-lg flex flex-col items-center p-0 relative overflow-visible"
+            custom={1}
+            variants={cardVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+          >
             <div className="w-full relative">
               <img src={predictiveAnalaytics} alt="AI Analytics" className="w-full h-60 object-cover" />
               <div className="absolute left-1/2 -translate-x-1/2 bottom-[-2.5rem] z-10">
@@ -109,9 +161,16 @@ const HomeAboutUs = () => {
                 </button>
               </Link>
             </div>
-          </div>
+          </motion.div>
           {/* Card 3 */}
-          <div className="bg-white shadow-lg flex flex-col items-center p-0 relative overflow-visible">
+          <motion.div
+            className="bg-white shadow-lg flex flex-col items-center p-0 relative overflow-visible"
+            custom={2}
+            variants={cardVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+          >
             <div className="w-full relative">
               <img src={bpa} alt="Automation Suite" className="w-full h-60 object-cover" />
               <div className="absolute left-1/2 -translate-x-1/2 bottom-[-2.5rem] z-10">
@@ -133,12 +192,18 @@ const HomeAboutUs = () => {
                 </button>
               </Link>
             </div>
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Flagship Product Section */}
-      <section className="w-full bg-[#3dc1b1] py-16 px-4 sm:px-6">
+      <motion.section
+        className="w-full bg-[#3dc1b1] py-16 px-4 sm:px-6"
+        variants={fadeInUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+      >
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center sm:px-6 lg:px-8">
           {/* Left Side: Image */}
           <div className="w-full md:w-1/2 flex justify-center mb-8 md:mb-0">
@@ -162,17 +227,30 @@ const HomeAboutUs = () => {
             </Link>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Explore Our Latest Articles Section */}
-      <section className="py-16 bg-gray-50">
+      <motion.section
+        className="py-16 bg-gray-50"
+        variants={fadeInUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-12 text-center">
             Explore Our Latest Articles
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Article Card 1 */}
-            <div className="p-3 flex flex-col items-start bg-transparent">
+            <motion.div
+              className="p-3 flex flex-col items-start bg-transparent"
+              custom={0}
+              variants={cardVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.3 }}
+            >
               <img src={explore1} alt="Article 1" className="w-full h-56 rounded-xl object-cover mb-4" />
               <h3 className="text-xl font-bold text-gray-800 mb-2 text-left">Fusce cursus nunc sed <br /> condimentum</h3>
               <Link to="/blogs">
@@ -180,9 +258,16 @@ const HomeAboutUs = () => {
                   Read More
                 </button>
               </Link>
-            </div>
+            </motion.div>
             {/* Article Card 2 */}
-            <div className="p-3 flex flex-col items-start bg-transparent">
+            <motion.div
+              className="p-3 flex flex-col items-start bg-transparent"
+              custom={1}
+              variants={cardVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.3 }}
+            >
               <img src={explore2} alt="Article 2" className="w-full h-56  object-cover rounded-xl mb-4" />
               <h3 className="text-xl font-bold text-gray-800 mb-2 text-left">Nulla non vulputate turpis, non tincidunt eros</h3>
               <Link to="/blogs">
@@ -190,9 +275,16 @@ const HomeAboutUs = () => {
                   Read More
                 </button>
               </Link>
-            </div>
+            </motion.div>
             {/* Article Card 3 */}
-            <div className=" p-3 flex flex-col items-start bg-transparent">
+            <motion.div
+              className="p-3 flex flex-col items-start bg-transparent"
+              custom={2}
+              variants={cardVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.3 }}
+            >
               <img src={explore3} alt="Article 3" className="w-full h-56  rounded-xl object-cover mb-4" />
               <h3 className="text-xl font-bold text-gray-800 mb-2 text-left">Mauris efficitur tellus vitae auctor auctor</h3>
               <Link to="/blogs">
@@ -200,10 +292,10 @@ const HomeAboutUs = () => {
                   Read More
                 </button>
               </Link>
-            </div>
+            </motion.div>
           </div>
         </div>
-      </section>
+      </motion.section>
     </>
   );
 };
