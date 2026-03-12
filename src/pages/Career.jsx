@@ -1,0 +1,823 @@
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import careerBg from "../assets/webp/services-bg.webp"; // Reusing existing background
+import { fetchJobs, applyForJob, generatePresignedUploadUrl, uploadResumeToS3, finalizeResumeUpload } from "../services/jobsApi";
+import { mapJobsFromApi } from "../services/jobMapper";
+import JobDetailModal from "../components/JobDetailModal";
+
+// Animation variants
+const fadeInUp = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7 } }
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: (i = 1) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.15,
+      duration: 0.7
+    }
+  })
+};
+
+// Note: Mock data removed - displaying API data only
+
+const Career = () => {
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showApplicationModal, setShowApplicationModal] = useState(false);
+  const [applicationData, setApplicationData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    resume: null,
+    coverLetter: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState({ type: "", text: "" });
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(12); // Increased from 6 to show more jobs per page
+  const [totalJobs, setTotalJobs] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
+  useEffect(() => {
+    const loadJobs = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Get tenant ID from config (if set, will filter to single tenant)
+        console.log('window.APP_CONFIG available?', !!window.APP_CONFIG);
+        console.log('window.APP_CONFIG.tenant:', window.APP_CONFIG?.tenant);
+        const tenantId = window.APP_CONFIG?.tenant?.id || null;
+
+        // Fetch jobs from API with pagination
+        // status: 'published' (default) - shows only published jobs
+        // Note: Backend /jobs/public does NOT support tenant_id parameter
+        // Tenant filtering is done CLIENT-SIDE in this component
+        const apiResponse = await fetchJobs(currentPage, itemsPerPage, 'published', tenantId);
+        console.log('Raw API response (all published jobs):', apiResponse);
+        console.log('Tenant ID from config:', tenantId || 'None (show all tenants)');
+        console.log('Will apply client-side filtering:', !!tenantId);
+
+        // Extract jobs array from response
+        // fetchJobs returns: { jobs: [], total, page, limit, hasMore, totalPages }
+        const jobsArray = apiResponse.jobs || [];
+        console.log(`Fetched ${jobsArray.length} jobs from API`);
+
+        // Map HRMS API format to Career component format
+        let mappedJobs = mapJobsFromApi(jobsArray);
+        console.log('Mapped jobs:', mappedJobs);
+
+        // Client-side filtering by tenant ID
+        // The backend /jobs/public endpoint doesn't support tenant_id filtering,
+        // so we filter on the client side to show only the specified tenant's jobs
+        if (tenantId) {
+          console.log(`🔍 Filtering jobs by tenant: ${tenantId}`);
+          const beforeFilter = mappedJobs.length;
+          mappedJobs = mappedJobs.filter(job => {
+            const matches = job.tenant_id === tenantId;
+            if (!matches) {
+              console.log(`❌ Filtered out job: ${job.title} (tenant: ${job.tenant_id})`);
+            }
+            return matches;
+          });
+          console.log(`✅ Filtered from ${beforeFilter} jobs to ${mappedJobs.length} jobs for tenant ${tenantId}`);
+        }
+
+        // Show all jobs (both published and draft)
+        // Note: If you want to filter by status, filter at API level, not after pagination
+        setJobs(mappedJobs);
+        const total = mappedJobs.length;  // Use filtered count, not API total
+        setTotalJobs(total);
+
+        // Calculate total pages with fallback
+        const totalPagesFromAPI = apiResponse.totalPages;
+        const calculatedPages = totalPagesFromAPI || Math.ceil(total / itemsPerPage);
+        setTotalPages(calculatedPages);
+
+        console.log('=== PAGINATION DEBUG ===');
+        console.log('Total jobs from API:', apiResponse.total);
+        console.log('Current page jobs:', mappedJobs.length);
+        console.log('Total pages calculated:', apiResponse.totalPages);
+        console.log('Items per page:', itemsPerPage);
+        console.log('API Response object:', {
+          total: apiResponse.total,
+          totalPages: apiResponse.totalPages,
+          page: apiResponse.page,
+          limit: apiResponse.limit,
+          hasMore: apiResponse.hasMore
+        });
+        console.log('Should show pagination?', calculatedPages > 1 || total > itemsPerPage);
+      } catch (err) {
+        console.error("Failed to fetch jobs from API:", err.message);
+        setError(err.message || "Unable to load job openings. Please try again later.");
+        setJobs([]); // Clear jobs on error
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadJobs();
+  }, [currentPage, itemsPerPage]);
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      // Scroll to top of job listings
+      const jobSection = document.getElementById('job-listings');
+      if (jobSection) {
+        jobSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
+  const handleViewDetails = (job) => {
+    setSelectedJob(job);
+    setShowDetailModal(true);
+  };
+
+  const handleCloseDetailModal = () => {
+    setShowDetailModal(false);
+    setSelectedJob(null);
+  };
+
+  const handleApplyClick = (job) => {
+    setSelectedJob(job);
+    setShowApplicationModal(true);
+    setShowDetailModal(false); // Close detail modal when opening apply form
+    setApplicationData({
+      fullName: "",
+      email: "",
+      phone: "",
+      resume: null,
+      coverLetter: "",
+    });
+    setSubmitMessage({ type: "", text: "" });
+  };
+
+  const handleCloseModal = () => {
+    setShowApplicationModal(false);
+    setSelectedJob(null);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setApplicationData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setApplicationData((prev) => ({
+      ...prev,
+      resume: file,
+    }));
+  };
+
+  const handleApplicationSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!applicationData.fullName || !applicationData.email || !applicationData.phone) {
+      setSubmitMessage({
+        type: "error",
+        text: "Please fill in all required fields",
+      });
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setSubmitMessage({ type: "", text: "" });
+
+      // Split full name into first and last name
+      const nameParts = applicationData.fullName.trim().split(/\s+/);
+      const firstName = nameParts[0];
+      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+
+      // Validate that we have both first and last name
+      if (!firstName || !lastName) {
+        setSubmitMessage({
+          type: "error",
+          text: "Please provide both first and last name",
+        });
+        setSubmitting(false);
+        return;
+      }
+
+      // Extract tenant_id from the selected job posting
+      const tenantId = selectedJob.tenant_id;
+      if (!tenantId) {
+        console.error('ERROR: Tenant ID is missing from job data:', selectedJob);
+        throw new Error('Unable to process application: Tenant information is missing from job posting');
+      }
+
+      // When resume is provided: use resume upload + parse flow only (creates candidate + application from parsed data)
+      // When no resume: use direct apply endpoint (creates candidate + application from form data)
+      // This prevents duplicate records from both paths creating separate entries
+      if (applicationData.resume) {
+        console.log('Step 1 - Resume provided, using resume upload flow only');
+        setSubmitMessage({
+          type: "success",
+          text: "Uploading resume...",
+        });
+
+        // Step 1: Generate presigned URL for S3 upload
+        console.log('Step 2 - Generating presigned URL for resume');
+        const presignedUrlResponse = await generatePresignedUploadUrl({
+          jobId: selectedJob.id,
+          fileName: applicationData.resume.name,
+          fileType: applicationData.resume.type,
+          tenantId: tenantId,
+        });
+
+        console.log('Step 3 - Presigned URL generated:', presignedUrlResponse);
+        const { uploadUrl, fileKey } = presignedUrlResponse;
+
+        // Step 2: Upload resume to S3
+        console.log('Step 4 - Uploading resume to S3');
+        await uploadResumeToS3(uploadUrl, applicationData.resume);
+        console.log('Step 5 - Resume uploaded to S3 successfully');
+
+        setSubmitMessage({
+          type: "success",
+          text: "Resume uploaded! Processing...",
+        });
+
+        // Step 3: Finalize upload and parse resume (this creates candidate + job_application)
+        console.log('Step 6 - Finalizing upload and parsing resume');
+        const finalizeResponse = await finalizeResumeUpload({
+          fileKey,
+          fileName: applicationData.resume.name,
+          jobId: selectedJob.id,
+          tenantId: tenantId,
+          applicantInfo: {
+            first_name: firstName,
+            last_name: lastName,
+            email: applicationData.email,
+            phone: applicationData.phone,
+            ...(applicationData.coverLetter ? { cover_letter: applicationData.coverLetter } : {}),
+          },
+        });
+
+        console.log('Step 7 - Resume parsed and candidate data saved:', finalizeResponse);
+
+        setSubmitMessage({
+          type: "success",
+          text: "Application submitted successfully! Resume has been processed and saved.",
+        });
+      } else {
+        // No resume: use direct apply endpoint
+        console.log('Step 1 - No resume, submitting application via form data');
+
+        const applicationPayload = {
+          job_id: selectedJob.id,
+          first_name: firstName,
+          last_name: lastName,
+          email: applicationData.email,
+          phone: applicationData.phone,
+        };
+
+        if (applicationData.coverLetter) {
+          applicationPayload.cover_letter = applicationData.coverLetter;
+        }
+
+        await applyForJob(selectedJob.id, applicationPayload);
+        console.log('Step 2 - Application saved successfully');
+
+        setSubmitMessage({
+          type: "success",
+          text: "Application submitted successfully! We'll get back to you soon.",
+        });
+      }
+
+      // Reset form after successful submission
+      setTimeout(() => {
+        handleCloseModal();
+      }, 2000);
+    } catch (err) {
+      console.error("Application submission failed:", err);
+      setSubmitMessage({
+        type: "error",
+        text: err.message || "Failed to submit application. Please try again.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Hero Section */}
+      <motion.div
+        className="w-full h-[90vh] flex flex-col items-center justify-center bg-center bg-cover relative"
+        style={{ backgroundImage: `url(${careerBg})` }}
+        variants={fadeInUp}
+        initial="hidden"
+        animate="visible"
+      >
+        <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+        <div className="relative z-10 text-center px-4">
+          <h1 className="text-white text-4xl md:text-6xl font-bold mb-4">
+            Join Our Team
+          </h1>
+          <p className="text-white text-lg md:text-xl max-w-2xl mx-auto">
+            Shape the future of technology with us. Explore exciting career opportunities.
+          </p>
+        </div>
+      </motion.div>
+
+      {/* Introduction Section */}
+      <motion.div
+        className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center"
+        variants={fadeInUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+      >
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6">
+          Why Work With Us?
+        </h2>
+        <p className="text-gray-600 text-lg leading-relaxed">
+          At Transforma Technologies, we believe in fostering innovation, collaboration, and growth.
+          Join a team of passionate professionals dedicated to transforming industries through
+          cutting-edge technology solutions. We offer competitive compensation, flexible work
+          arrangements, and opportunities for continuous learning.
+        </p>
+      </motion.div>
+
+      {/* Job Listings Section */}
+      <motion.div
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-gray-50"
+        variants={fadeInUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+      >
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-12 text-center">
+          Current Openings
+        </h2>
+
+        {/* Loading State */}
+        {loading && (
+          <div className="flex justify-center items-center py-16">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#3dc1b1]"></div>
+              <p className="text-gray-600 mt-4">Loading job openings...</p>
+            </div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8 text-center">
+            <svg className="w-12 h-12 text-red-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-red-700 font-semibold mb-2">Unable to Load Job Openings</p>
+            <p className="text-red-600 text-sm">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 bg-red-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-red-700 transition"
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && jobs.length === 0 && !error && (
+          <div className="text-center py-16">
+            <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            <p className="text-gray-700 text-xl font-semibold mb-2">No Job Openings Available</p>
+            <p className="text-gray-600 text-lg">We don't have any open positions at the moment, but we're always looking for talented individuals!</p>
+            <p className="text-gray-600 text-sm mt-4">Check back soon or reach out to us directly.</p>
+            <a
+              href="/contact"
+              className="mt-6 inline-block bg-[#3dc1b1] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#35b0a1] transition"
+            >
+              Contact Us
+            </a>
+          </div>
+        )}
+
+        {/* Job Cards Grid */}
+        {!loading && jobs.length > 0 && (
+          <>
+            <div id="job-listings" className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {jobs.map((job, index) => (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  index={index}
+                  onViewDetails={handleViewDetails}
+                  onApplyClick={handleApplyClick}
+                />
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 || totalJobs > itemsPerPage ? (
+              <div className="flex justify-center items-center gap-2 mt-12">
+                {/* Previous Button */}
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-semibold hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  ← Previous
+                </button>
+
+                {/* Page Numbers */}
+                <div className="flex gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      className={`px-3 py-2 rounded-lg font-semibold transition ${
+                        currentPage === page
+                          ? 'bg-[#3dc1b1] text-white'
+                          : 'border border-gray-300 text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Next Button */}
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-semibold hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  Next →
+                </button>
+              </div>
+            ) : null}
+
+            {/* Pagination Info */}
+            {(totalPages > 1 || totalJobs > itemsPerPage) && (
+              <p className="text-center text-gray-600 text-sm mt-4">
+                Page {currentPage} of {totalPages} • Showing {jobs.length} of {totalJobs} jobs
+              </p>
+            )}
+          </>
+        )}
+      </motion.div>
+
+      {/* Call to Action Section */}
+      <motion.div
+        className="bg-[#3dc1b1] py-16"
+        variants={fadeInUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+      >
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+            Don't See the Right Role?
+          </h2>
+          <p className="text-white text-lg mb-8">
+            We're always looking for talented individuals. Send us your resume and
+            we'll keep you in mind for future opportunities.
+          </p>
+          <a
+            href="/contact"
+            className="inline-block bg-white text-[#3dc1b1] px-8 py-3 rounded-full font-semibold shadow-lg hover:bg-gray-100 transition"
+          >
+            Get In Touch
+          </a>
+        </div>
+      </motion.div>
+
+      {/* Job Detail Modal */}
+      <JobDetailModal
+        job={selectedJob}
+        isOpen={showDetailModal}
+        onClose={handleCloseDetailModal}
+        onApplyClick={handleApplyClick}
+      />
+
+      {/* Application Modal */}
+      <AnimatePresence>
+        {showApplicationModal && selectedJob && (
+          <ApplicationModal
+            job={selectedJob}
+            applicationData={applicationData}
+            onClose={handleCloseModal}
+            onInputChange={handleInputChange}
+            onFileChange={handleFileChange}
+            onSubmit={handleApplicationSubmit}
+            isSubmitting={submitting}
+            submitMessage={submitMessage}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+/**
+ * Truncate text to specified number of lines
+ */
+const truncateText = (text, lines = 2) => {
+  if (!text) return '';
+  const textLines = text.split('\n');
+  return textLines.slice(0, lines).join('\n');
+};
+
+/**
+ * Check if text is truncated
+ */
+const isTruncated = (text, lines = 2) => {
+  if (!text) return false;
+  return text.split('\n').length > lines;
+};
+
+// Job Card Component
+const JobCard = ({ job, index, onViewDetails, onApplyClick }) => {
+  const truncatedDescription = truncateText(job.description, 2);
+  const hasMoreContent = isTruncated(job.description, 2);
+
+  return (
+    <motion.div
+      className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
+      custom={index}
+      variants={cardVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+    >
+      <div className="p-6">
+        {/* Tenant Name */}
+        <p className="text-sm text-gray-500 mb-2 font-semibold">
+          {job.tenant_name || 'Company'}
+        </p>
+
+        {/* Job Header */}
+        <div className="mb-4">
+          <h3 className="text-2xl font-bold text-gray-800 mb-2">
+            {job.title}
+          </h3>
+          <div className="flex flex-wrap gap-2 mb-3">
+            <span className="inline-block bg-[#3dc1b1] text-white text-sm px-3 py-1 rounded-full">
+              {job.department}
+            </span>
+            <span className="inline-block bg-[#484848] text-white text-sm px-3 py-1 rounded-full">
+              {job.type}
+            </span>
+          </div>
+        </div>
+
+        {/* Job Details */}
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center text-gray-600">
+            <svg className="w-5 h-5 mr-2 text-[#3dc1b1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span>{job.location}</span>
+          </div>
+          <div className="flex items-center text-gray-600">
+            <svg className="w-5 h-5 mr-2 text-[#3dc1b1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            <span>{job.experience} experience</span>
+          </div>
+        </div>
+
+        {/* Job Description - Truncated */}
+        <div className="mb-4">
+          <p className="text-gray-600 line-clamp-3">
+            {truncatedDescription}
+          </p>
+          {hasMoreContent && (
+            <button
+              onClick={() => onViewDetails(job)}
+              className="text-[#3dc1b1] font-semibold mt-2 hover:text-[#35b0a1] transition inline-flex items-center"
+            >
+              View More
+              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-3 mt-6">
+          <button
+            onClick={() => onViewDetails(job)}
+            className="flex-1 bg-gray-100 text-gray-800 px-4 py-2 rounded-full font-semibold hover:bg-gray-200 transition text-sm"
+          >
+            View Details
+          </button>
+          <button
+            onClick={() => onApplyClick(job)}
+            className="flex-1 bg-[#3dc1b1] text-white px-4 py-2 rounded-full font-semibold hover:bg-[#35b0a1] transition text-sm"
+          >
+            Apply Now
+          </button>
+        </div>
+
+        {/* Posted Date */}
+        <div className="mt-4 text-sm text-gray-500">
+          Posted: {new Date(job.postedDate).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })}
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+// Application Modal Component
+const ApplicationModal = ({
+  job,
+  applicationData,
+  onClose,
+  onInputChange,
+  onFileChange,
+  onSubmit,
+  isSubmitting,
+  submitMessage,
+}) => {
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+    >
+      <motion.div
+        className="bg-white rounded-lg shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto"
+        initial={{ scale: 0.9, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.9, y: 20 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Modal Header */}
+        <div className="sticky top-0 bg-[#3dc1b1] text-white p-6 flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold">{job.title}</h2>
+            <p className="text-sm text-teal-100 mt-1">{job.location}</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-white hover:bg-[#35b0a1] p-2 rounded-full transition"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Modal Body */}
+        <div className="p-6">
+          <form onSubmit={onSubmit} className="space-y-4">
+            {/* Full Name */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Full Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="fullName"
+                value={applicationData.fullName}
+                onChange={onInputChange}
+                placeholder="John Doe"
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3dc1b1]"
+              />
+            </div>
+
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Email Address <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={applicationData.email}
+                onChange={onInputChange}
+                placeholder="john@example.com"
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3dc1b1]"
+              />
+            </div>
+
+            {/* Phone */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Phone Number <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="tel"
+                name="phone"
+                value={applicationData.phone}
+                onChange={onInputChange}
+                placeholder="+1 (555) 123-4567"
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3dc1b1]"
+              />
+            </div>
+
+            {/* Resume Upload */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Resume (PDF, DOC, DOCX)
+              </label>
+              <input
+                type="file"
+                onChange={onFileChange}
+                accept=".pdf,.doc,.docx"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3dc1b1]"
+              />
+              {applicationData.resume && (
+                <p className="text-sm text-green-600 mt-2">
+                  ✓ {applicationData.resume.name}
+                </p>
+              )}
+            </div>
+
+            {/* Cover Letter */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Cover Letter
+              </label>
+              <textarea
+                name="coverLetter"
+                value={applicationData.coverLetter}
+                onChange={onInputChange}
+                placeholder="Tell us why you're interested in this position..."
+                rows="4"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3dc1b1] resize-none"
+              />
+            </div>
+
+            {/* Success/Error Message */}
+            {submitMessage.text && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`p-4 rounded-lg ${
+                  submitMessage.type === "success"
+                    ? "bg-green-50 border border-green-200 text-green-700"
+                    : "bg-red-50 border border-red-200 text-red-700"
+                }`}
+              >
+                <p className="text-sm font-semibold">{submitMessage.text}</p>
+              </motion.div>
+            )}
+
+            {/* Submit Button */}
+            <div className="flex gap-3 pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 bg-gray-200 text-gray-800 px-4 py-3 rounded-lg font-semibold hover:bg-gray-300 transition disabled:opacity-50"
+                disabled={isSubmitting}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex-1 bg-[#3dc1b1] text-white px-4 py-3 rounded-lg font-semibold hover:bg-[#35b0a1] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Submitting...
+                  </>
+                ) : (
+                  "Submit Application"
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+export default Career;
