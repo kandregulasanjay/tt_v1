@@ -1,5 +1,5 @@
 import React from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import AboutUs from './pages/AboutUs';
@@ -10,6 +10,7 @@ import SupportCenter from './pages/SupportCenter';
 import Contact from './pages/Contact';
 import Blog from './pages/Blog';
 import Login from './pages/Login';
+import Career from './pages/Career';
 
 const App = () => {
   return (
@@ -26,6 +27,7 @@ const App = () => {
           <Route path="/blogs" element={<Blog/>} />
           <Route path="/support-center" element={<SupportCenter/>} />
           <Route path="/login" element={<Login />} />
+          <Route path="/careers" element={<Career/>} />
         </Routes>
       </div>
       <Footer />

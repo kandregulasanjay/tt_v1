@@ -25,6 +25,7 @@ const Navbar = () => {
             <Link to="/about" className="text-gray-700 hover:text-[#3DC1B1] font-medium">About Us</Link>
             <Link to="/services" className="text-gray-700 hover:text-[#3DC1B1] font-medium">Services</Link>
             <Link to="/products" className="text-gray-700 hover:text-[#3DC1B1] font-medium">Products</Link>
+            <Link to="/careers" className="text-gray-700 hover:text-[#3DC1B1] font-medium">Careers</Link>
             <Link to="/blogs" className="text-gray-700 hover:text-[#3DC1B1] font-medium">Blogs/News</Link>
             {/* <Link to="/contact" className="text-gray-700 hover:text-[#3DC1B1] font-medium">Contact Us</Link> */}
             <Link to="/support-center" className="text-gray-700 hover:text-[#3DC1B1] font-medium">Support/FAQ</Link>
@@ -67,6 +68,7 @@ const Navbar = () => {
             <Link to="/about" className="text-gray-700 hover:text-[#3DC1B1] font-medium" onClick={() => setMenuOpen(false)}>About Us</Link>
             <Link to="/services" className="text-gray-700 hover:text-[#3DC1B1] font-medium" onClick={() => setMenuOpen(false)}>Services</Link>
             <Link to="/products" className="text-gray-700 hover:text-[#3DC1B1] font-medium" onClick={() => setMenuOpen(false)}>Products</Link>
+            <Link to="/careers" className="text-gray-700 hover:text-[#3DC1B1] font-medium" onClick={() => setMenuOpen(false)}>Careers</Link>
             <Link to="/blogs" className="text-gray-700 hover:text-[#3DC1B1] font-medium" onClick={() => setMenuOpen(false)}>Blogs/News</Link>
             {/* <Link to="/contact" className="text-gray-700 hover:text-[#3DC1B1] font-medium" onClick={() => setMenuOpen(false)}>Contact Us</Link> */}
             <Link to="/support-center" className="text-gray-700 hover:text-[#3DC1B1] font-medium" onClick={() => setMenuOpen(false)}>Support/FAQ</Link>

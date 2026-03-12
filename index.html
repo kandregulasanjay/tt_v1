@@ -4,6 +4,72 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Transforma Technologies</title>
+    <!-- Inject environment variables for config.js -->
+    <script>
+      window.__ENV__ = {
+        HRMS_API_URL: __VITE_HRMS_API_URL__,
+        CORS_ORIGIN: __VITE_CORS_ORIGIN__,
+        JOBS_ENDPOINT: __VITE_JOBS_ENDPOINT__,
+        HEALTH_ENDPOINT: __VITE_HEALTH_ENDPOINT__,
+        APPLY_ENDPOINT: __VITE_APPLY_ENDPOINT__,
+        DEBUG_API: __VITE_DEBUG_API__,
+        TENANT_ID: __VITE_TENANT_ID__ === 'null' ? null : __VITE_TENANT_ID__,
+        APP_NAME: __VITE_APP_NAME__,
+        APP_VERSION: __VITE_APP_VERSION__,
+        APP_ENVIRONMENT: __VITE_APP_ENVIRONMENT__,
+        CORS_CREDENTIALS: __VITE_CORS_CREDENTIALS__,
+        API_TIMEOUT: __VITE_API_TIMEOUT__,
+        API_RETRIES: __VITE_API_RETRIES__,
+        API_RETRY_DELAY: __VITE_API_RETRY_DELAY__,
+        FEATURE_JOB_SEARCH: __VITE_FEATURE_JOB_SEARCH__,
+        FEATURE_JOB_FILTERING: __VITE_FEATURE_JOB_FILTERING__,
+        FEATURE_APPLICATION_SUBMISSION: __VITE_FEATURE_APPLICATION_SUBMISSION__,
+        FEATURE_RESUME_UPLOAD: __VITE_FEATURE_RESUME_UPLOAD__,
+      };
+      console.log('📋 Environment variables loaded:', window.__ENV__);
+    </script>
+    <!-- Load configuration before app starts -->
+    <script>
+      // Determine environment and load appropriate config
+      const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const configFile = isDev ? '/config.local.js?v=' + Date.now() : '/config.js?v=' + Date.now();
+      console.log(`📋 Loading config: ${configFile} (${isDev ? 'LOCAL' : 'PRODUCTION'})`);
+
+      // Load config synchronously to ensure it's available before app starts
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', configFile, false); // false = synchronous
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          // Execute the config script
+          eval(xhr.responseText);
+          console.log('✅ Config loaded successfully');
+          console.log('🔍 window.APP_CONFIG:', window.APP_CONFIG);
+          if (window.APP_CONFIG && window.APP_CONFIG.tenant) {
+            console.log('📌 Tenant ID:', window.APP_CONFIG.tenant.id);
+          } else {
+            console.error('⚠️ Tenant property not found in config');
+            // Fallback: Add tenant config if missing
+            if (!window.APP_CONFIG.tenant) {
+              console.log('🔧 Adding tenant config fallback...');
+              window.APP_CONFIG.tenant = {
+                id: window.__ENV__.TENANT_ID
+              };
+              console.log('✅ Fallback tenant applied:', window.APP_CONFIG.tenant.id);
+            }
+          }
+        } else {
+          console.error(`❌ Failed to load config: ${xhr.status}`);
+        }
+      };
+      xhr.onerror = function() {
+        console.error('❌ Failed to load config (network error):', configFile);
+      };
+      try {
+        xhr.send();
+      } catch (e) {
+        console.error('❌ Error sending config request:', e);
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
